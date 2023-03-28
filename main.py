@@ -42,6 +42,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.neighbors import KNeighborsClassifier
+from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
 from sklearn.naive_bayes import GaussianNB
 from sklearn.svm import SVC
 
@@ -108,6 +109,11 @@ def main():
     knn = KNeighborsClassifier(n_neighbors=1).fit(x_train, y_train)
     print("Accuracy on training set: {:.3f}".format(knn.score(x_train, y_train)))
     print("Accuracy on test set: {:.3f}".format(knn.score(x_test, y_test)))
+
+    # ----------------------------
+    lda = LinearDiscriminantAnalysis().fit(x_train, y_train)
+    print("Accuracy on training set: {:.3f}".format(lda.score(x_train, y_train)))
+    print("Accuracy on test set: {:.3f}".format(lda.score(x_test, y_test)))
 
     # ----------------------------
     gnb = GaussianNB().fit(x_train, y_train)
