@@ -40,6 +40,10 @@ from matplotlib import cm
 from pandas.plotting import scatter_matrix
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import MinMaxScaler
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.naive_bayes import GaussianNB
+from sklearn.svm import SVC
 
 from table import Table
 
@@ -53,29 +57,67 @@ NUMERIC_COLUMNS = ['landmass', 'zone', 'area', 'population', 'language', 'religi
 
 
 def main():
+    # ----------------------------
     t = Table(DATA_FILE, COLUMNS)
 
+    # ----------------------------
+    print(t.value.describe())
+
+    # ----------------------------
     print(t.value.head())
+    print(t.value.shape)
 
     # ----------------------------
-    # print(table.head()) # to see the data
-    # print(table.shape) # to see the shape of the data (rows, columns)
-    # print(table.columns)  # to see the columns of the data
-    # ----------------------------
+    for column in t.value.columns:
+        print("Unique values in column {} are: {}".format(column, t.value[column].unique()))
 
     # ----------------------------
-    # for non numeric columns use sns.countplot(table['name'], label="Count"), plt.show()
-    # for numeric columns use table.drop(['name'], axis=1).hist(bins=30, figsize=(9, 9)), plt.show()
-    # ----------------------------
+    for column in t.value.columns:
+        if column not in NUMERIC_COLUMNS:
+            t.value[column].value_counts().plot(kind='bar')
+            plt.title("Histogram of {}".format(column))
+            plt.show()
+
+    for column in NUMERIC_COLUMNS:
+        t.value.drop([column], axis=1).hist(bins=30, figsize=(9, 9))
+        plt.suptitle("Histogram of {}".format(column))
+        plt.show()
 
     # ----------------------------
-    # x = table[NUMERIC_COLUMNS]
-    # y = table['name']
-    # colours = np.arange(len(y))
-    # scatter = scatter_matrix(x, c=colours, marker='o', s=40,
-    #                        hist_kwds={'bins': 15}, cmap='gnuplot')
-    # plt.savefig('table_scatter_matrix')
+    x = t.value[NUMERIC_COLUMNS]
+    x = x.sample(n=5, axis=1)
+    y = t.value['name']
+    colours = np.arange(len(y))
+    cmap = matplotlib.colormaps["gnuplot"]
+    scatter = scatter_matrix(x, c=colours, marker='o', s=40, hist_kwds={'bins': 15}, figsize=(9, 9), cmap=cmap)
+    plt.suptitle('Scatter-matrix for each input variable')
+    plt.show()
+
     # ----------------------------
+    x_train, x_test, y_train, y_test = train_test_split(x, y, random_state=0)
+    scaler = MinMaxScaler()
+    x_train = scaler.fit_transform(x_train)
+    x_test = scaler.transform(x_test)
+
+    # ----------------------------
+    tree = DecisionTreeClassifier().fit(x_train, y_train)
+    print("Accuracy on training set: {:.3f}".format(tree.score(x_train, y_train)))
+    print("Accuracy on test set: {:.3f}".format(tree.score(x_test, y_test)))
+
+    # ----------------------------
+    knn = KNeighborsClassifier(n_neighbors=1).fit(x_train, y_train)
+    print("Accuracy on training set: {:.3f}".format(knn.score(x_train, y_train)))
+    print("Accuracy on test set: {:.3f}".format(knn.score(x_test, y_test)))
+
+    # ----------------------------
+    gnb = GaussianNB().fit(x_train, y_train)
+    print("Accuracy on training set: {:.3f}".format(gnb.score(x_train, y_train)))
+    print("Accuracy on test set: {:.3f}".format(gnb.score(x_test, y_test)))
+
+    # ----------------------------
+    svm = SVC().fit(x_train, y_train)
+    print("Accuracy on training set: {:.3f}".format(svm.score(x_train, y_train)))
+    print("Accuracy on test set: {:.3f}".format(svm.score(x_test, y_test)))
 
 
 if __name__ == '__main__':
